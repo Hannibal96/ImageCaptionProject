@@ -36,7 +36,7 @@ Our model is a decoder-encoder which have 4 main parts:
 from the images (Encoder) - for this part we decided to use a pretrained **Resnet-50**
 2. an attention mechanism that weights the
 image features - 
-3. Embeddings for the tokens in the captions - loading pretrained word embeddings is optional
+3. Embeddings for the tokens in the captions -  [*Pre-trained word embeddings*](https://pytorch.org/text/stable/vocab.html#glove) added as optional
 4. An RNN that generates captions to
 describe the weighted image features (Decoder) - We will use an LSTM 
 
@@ -45,4 +45,4 @@ describe the weighted image features (Decoder) - We will use an LSTM
 </p>
 
 
-This model can be trained end-to-end using backpropogation, however 
+This model can be trained end-to-end using backpropogation, however we will freeze the Encoder weights and use the learned feature map from the pretrained model
