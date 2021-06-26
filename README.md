@@ -23,7 +23,7 @@ All The above models are based upon an architicture which consists of a CNN that
 In this project we will implement a model which is based on: 
 
 [***Show, Attend and Tell***](https://arxiv.org/pdf/1502.03044.pdf)
-where soft attention mechanism has been added to the architicture, which at each time-step the models learns **where to look**. 
+where soft attention mechanism has been added to the architicture, which at each time-step the models learns *where to look*. 
 <p align="center">
   <img src="./imgs_for_readme/dogtie.png" width="400"/>
 </p>
@@ -31,11 +31,18 @@ where soft attention mechanism has been added to the architicture, which at each
 
 
 ## Overview:
-The model make use in the idea of *transfer learning*, *encoder-decoder architecture* and *attention*.
-The forward action of the model consists of two parts, Encoder and Decoder.
-The Encoder is a CNN that takes image as an input and extract its features. The features will be the last layer before the final output layer.
-For purposes of efficiency, we will use pretrained model of resnet50 and use its output features as the input for the decoder. 
+Our model is a decoder-encoder which have 4 main parts: 
+1. A convolutional neural network that extracts features
+from the images (Encoder) - for this part we decided to use a pretrained **Resnet-50**
+2. an attention mechanism that weights the
+image features - 
+3. Embeddings for the tokens in the captions - loading pretrained word embeddings is optional
+4. An RNN that generates captions to
+describe the weighted image features (Decoder) - We will use an LSTM 
 
-While the Decoder part will be LSTM instead of plain RNN layer.
-The output of the decoder then goes into the Decoder that in addition receive the sentence that describing the photo in case it is the training part or the generated sentence so far in case of prediction.
+<p align="center">
+  <img src="./imgs_for_readme/Overall_arch.png" width="400"/>
+</p>
 
+
+This model can be trained end-to-end using backpropogation, however 
