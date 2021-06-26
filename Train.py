@@ -1,16 +1,7 @@
 from DataLoader import *
-
+from tqdm import tqdm
 
 def save_model(model, num_epochs):
-    model_state = {
-        'num_epochs': num_epochs,
-        'embed_size': embed_size,
-        'vocab_size': len(dataset.vocab),
-        'attention_dim': attention_dim,
-        'encoder_dim': encoder_dim,
-        'decoder_dim': decoder_dim,
-        'state_dict': model.state_dict()
-    }
     path = "caption_model_E_"+str(num_epochs)+".torch"
     torch.save(model, path)
 
@@ -72,7 +63,7 @@ loss_list = []
 perplexity_list = []
 total_loss = 0
 for epoch in range(1, num_epochs + 1):
-    for idx, (image, captions) in enumerate(iter(data_loader)):
+    for idx, (image, captions) in tqdm(enumerate(iter(data_loader))):
         image, captions = image.to(device), captions.to(device)
 
         # Zero the gradients.
