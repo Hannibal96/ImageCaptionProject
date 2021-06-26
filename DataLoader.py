@@ -63,7 +63,7 @@ class FlickrDataset(Dataset):
     """
     def __init__(self, root_dir, captions_file, transform=None, freq_threshold=5):
         self.root_dir = root_dir
-        self.df = captions_df(captions_file)
+        self.df = pd.read_csv(captions_file)
         self.transform = transform
 
         # Get image and caption colum from the dataframe
@@ -94,11 +94,7 @@ class FlickrDataset(Dataset):
         caption_vec += [self.vocab.stoi["<EOS>"]]
 
         return img, torch.tensor(caption_vec)
-    
-def captions_df(file):
-    df = pd.read_csv(file ,delimiter='\t',names=['image','caption'])
-    df['image'] = df['image'].apply(lambda x: x.split('#')[0])
-    return df
+
 
 def show_image(inp, title=None):
     """Imshow for Tensor."""

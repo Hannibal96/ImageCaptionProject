@@ -42,37 +42,37 @@ def plot_attention(img, result, attention_plot):
     plt.show()
 
 
-# data_location = '.'
+data_location = '.'
 
-# transforms = T.Compose([T.Resize(226), T.RandomCrop(224), T.ToTensor(), T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
-
-
-# dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions.txt",
-#                         transform=transforms)
-# print("Finished building the Dataset.")
+transforms = T.Compose([T.Resize(226), T.RandomCrop(224), T.ToTensor(), T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 
 
-# pad_idx = dataset.vocab.stoi["<PAD>"]
+dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions.txt",
+                        transform=transforms)
+print("Finished building the Dataset.")
 
-# data_loader = DataLoader(
-#     dataset=dataset,
-#     batch_size=1,
-#     num_workers=0,
-#     shuffle=True,
-#     collate_fn=CapsCollate(pad_idx=pad_idx, batch_first=True)
-# )
 
-# # show any 1
-# dataiter = iter(data_loader)
-# images, _ = next(dataiter)
+pad_idx = dataset.vocab.stoi["<PAD>"]
 
-# model_name = './caption_model_E_1.torch'
-# model = torch.load(model_name)
+data_loader = DataLoader(
+    dataset=dataset,
+    batch_size=1,
+    num_workers=0,
+    shuffle=True,
+    collate_fn=CapsCollate(pad_idx=pad_idx, batch_first=True)
+)
 
-# img = images[0].detach().clone()
-# img1 = images[0].detach().clone()
+# show any 1
+dataiter = iter(data_loader)
+images, _ = next(dataiter)
 
-# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# caps, alphas = get_caps_from(img.unsqueeze(0), model=model)
+model_name = './caption_model_E_1.torch'
+model = torch.load(model_name)
 
-# plot_attention(img1, caps, alphas)
+img = images[0].detach().clone()
+img1 = images[0].detach().clone()
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+caps, alphas = get_caps_from(img.unsqueeze(0), model=model)
+
+plot_attention(img1, caps, alphas)
