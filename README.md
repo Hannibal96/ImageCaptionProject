@@ -23,7 +23,7 @@ All The above models are based upon an architicture which consists of a CNN that
 In this project we will implement a model which is based on: 
 
 [***Show, Attend and Tell***](https://arxiv.org/pdf/1502.03044.pdf)
-where soft attention mechanism has been added to the architicture, which at each time-step the models learns _where_ _to_ _look_. 
+where soft attention mechanism has been added to the architicture, which at each time-step the models learns **where to look**. 
 <p align="center">
   <img src="./imgs_for_readme/dogtie.png" width="400"/>
 </p>
