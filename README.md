@@ -15,7 +15,7 @@ https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaption
 https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaptionInWild-1.pdf
 
 The simplest DL architicture to solve this task consists of a CNN that learns a feature-map followed by an RNN that generates the caption:
-![](./imgs_for_readme/Arch_init.png)
+![](./imgs_for_readme/Arch_init.png=250x250)
 ## Overview:
 The model make use in the idea of *transfer learning*, *encoder-decoder architecture* and *attention*.
 The forward action of the model consists of two parts, Encoder and Decoder.
