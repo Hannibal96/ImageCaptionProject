@@ -9,17 +9,18 @@ Image captioning is a task for generating textual description of an image. for e
 ### Previous work:  
 There is a lot of approaches and trials to approach the task, the most celebrated ones are referred to bellow, most of the work done in the last years is a combination of those works.
 1.	Andrej Karpathy Ph.D. work was done about image description:
-https://cs.stanford.edu/people/karpathy/cvpr2015.pdf
+[***Deep Visual-Semantic Alignments for Generating Image Descriptions***](https://cs.stanford.edu/people/karpathy/cvpr2015.pdf)
 the work mostly showed the idea of RCNN, scoring method and the idea to build the sentence by looking at different parts of the image.
 2.	Google builds on the previous work using LSTM instead of plain RNN and beam search:
-https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaptionInWild-1.pdf
 3.	Microsoft architecture added the ability to identify landmarks and celebrities:
-https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaptionInWild-1.pdf
+[***Rich Image Captioning in the Wild**](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaptionInWild-1.pdf)
 
-The simplest DL architicture to solve this task consists of a CNN that learns a feature-map followed by an RNN that generates the caption:
+
+All The above models are based upon an architicture which consists of a CNN that learns a feature-map followed by an RNN that generates the caption:
 <p align="center">
   <img src="./imgs_for_readme/Arch_init.png" width="400"/>
 </p>
+[***Frequently Asked Questions***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Image-Captioning#faqs)
 
 ## Overview:
 The model make use in the idea of *transfer learning*, *encoder-decoder architecture* and *attention*.
