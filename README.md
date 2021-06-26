@@ -53,4 +53,14 @@ that have 8092 images along with 5 _reference_ captions per image (used for [eva
 
 ### Evaluation Metric
 By far the most popular metric for evaluating generated sentences is the [***Blue score***](https://www.aclweb.org/anthology/P02-1040.pdf)
-Which uses the reference captions to evaluate the generated caption.
+Which uses the 5 reference captions provided in the dataset to evaluate the generated caption.
+
+## Usage 
+- Download the dataset as described above
+- The dataset contains few folders:
+    - Flicker8k_Dataset  folder contains all the images 
+    - Flickr8k_text folder which contains different multiple folders:
+        - We will use only the **Flickr8k.token.txt** which contains the raw captions per image
+        - You can use the lemmatized version of the above captions (Flickr8k.lemma.txt)
+
+- save ...
