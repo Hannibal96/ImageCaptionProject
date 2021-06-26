@@ -49,8 +49,8 @@ describe the weighted image features (Decoder) - We will use an LSTM
 
 ### Data
 We will use the **Flicker8k** dataset which can be downloaded from [***here***](https://www.kaggle.com/ming666/flicker8k-dataset)
-that have 8092 images along with 5 captions per image.
+that have 8092 images along with 5 _reference_ captions per image (used for [evaluation](https://github.com/Hannibal96/ImageCaptionProject/blob/master/README.md#evaluation-metric)
 
-### Evaluation Metric:
+### Evaluation Metric
 By far the most popular metric for evaluating generated sentences is the [***Blue score***](https://www.aclweb.org/anthology/P02-1040.pdf)
 Which uses the reference captions to evaluate the generated caption.
