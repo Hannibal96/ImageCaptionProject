@@ -13,14 +13,20 @@ There is a lot of approaches and trials to approach the task, the most celebrate
 the work mostly showed the idea of RCNN, scoring method and the idea to build the sentence by looking at different parts of the image.
 2.	Google builds on the previous work using LSTM instead of plain RNN and beam search:
 3.	Microsoft architecture added the ability to identify landmarks and celebrities:
-[***Rich Image Captioning in the Wild**](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaptionInWild-1.pdf)
+[***Rich Image Captioning in the Wild***](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaptionInWild-1.pdf)
 
-
+### Scope
 All The above models are based upon an architicture which consists of a CNN that learns a feature-map followed by an RNN that generates the caption:
 <p align="center">
   <img src="./imgs_for_readme/Arch_init.png" width="400"/>
 </p>
-[***Frequently Asked Questions***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Image-Captioning#faqs)
+In this project we will implement a model which is based on [_Show, Attend, and Tell_](https://arxiv.org/abs/1502.03044)
+where soft attention mechanism has been added to the architicture, which at each time-step the models learns _where to look_. 
+<p align="center">
+  <img src="./imgs_for_readme/dogtie.png" width="400"/>
+</p>
+
+
 
 ## Overview:
 The model make use in the idea of *transfer learning*, *encoder-decoder architecture* and *attention*.
