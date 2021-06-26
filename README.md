@@ -21,6 +21,7 @@ All The above models are based upon an architicture which consists of a CNN that
   <img src="./imgs_for_readme/Arch_init.png" width="400"/>
 </p>
 In this project we will implement a model which is based on: 
+
 [***Rich Image Captioning in the Wild***](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/ImageCaptionInWild-1.pdf)
 where soft attention mechanism has been added to the architicture, which at each time-step the models learns _where to look_. 
 <p align="center">
