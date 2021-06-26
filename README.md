@@ -1,8 +1,10 @@
 # ImageCaptionProject
 
 ## Introduction:
-Image captioning is a task for generating textual description of an image. 
-![](./imgs_for_readme/examples.png)
+Image captioning is a task for generating textual description of an image. for example:
+<p align="center">
+  <img src="./imgs_for_readme/examples.png" width="600"/>
+</p>
 
 ### Previous work:  
 There is a lot of approaches and trials to approach the task, the most celebrated ones are referred to bellow, most of the work done in the last years is a combination of those works.
