@@ -31,6 +31,8 @@ where soft attention mechanism has been added to the architicture, which at each
 
 
 ## Overview:
+
+### Model
 Our model is a decoder-encoder which have 4 main parts: 
 1. A convolutional neural network that extracts features
 from the images (Encoder) - for this part we decided to use a pretrained **Resnet-50**
@@ -45,4 +47,10 @@ describe the weighted image features (Decoder) - We will use an LSTM
 </p>
 
 
-This model can be trained end-to-end using backpropogation, however we will freeze the Encoder weights and use the learned feature map from the pretrained model
+### Data
+We will use the **Flicker8k** dataset which can be downloaded from [***here***](https://www.kaggle.com/ming666/flicker8k-dataset)
+that have 8092 images along with 5 captions per image.
+
+### Evaluation Metric:
+By far the most popular metric for evaluating generated sentences is the [***Blue score***](https://www.aclweb.org/anthology/P02-1040.pdf)
+Which uses the reference captions to evaluate the generated caption.
