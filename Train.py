@@ -61,7 +61,7 @@ model = EncoderDecoder(
     embedding_weights = weights_matrix
 ).to(device)
 
-criterion = nn.CrossEntropyLoss(ignore_index=vocab.stoi["<PAD>"])
+criterion = nn.CrossEntropyLoss(ignore_index=vocab.stoi["<PAD>"]).to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 num_epochs = 10
@@ -80,7 +80,7 @@ data_loader = DataLoader(
 loss_list = []
 perplexity_list = []
 total_loss = 0
-for epoch in range(1, 1 + 1):
+for epoch in range(1, num_epochs + 1):
     for idx, (image, captions) in enumerate(iter(data_loader)):
         image, captions = image.to(device), captions.to(device)
 
@@ -89,9 +89,11 @@ for epoch in range(1, 1 + 1):
 
         # Feed forward
         outputs, attentions = model(image, captions)
+        outputs = outputs.to(device)
 
         # Calculate the batch loss.
         targets = captions[:, 1:]
+        targets = targets.to(device)
         loss = criterion(outputs.view(-1, vocab_size), targets.reshape(-1))
 
         # Backward pass.
@@ -103,7 +105,7 @@ for epoch in range(1, 1 + 1):
         total_loss += loss.item()
 
         loss_list.append(loss.item())
-        if (idx + 1) % 10 == 0:
+        if (idx + 1) % print_every == 0:
             perplexity = total_loss / print_every
             perplexity = np.exp(perplexity)
             perplexity_list.append(perplexity)
@@ -120,7 +122,9 @@ for epoch in range(1, 1 + 1):
             print("Epoch: {} loss: {:.5f}, perplexity: {:.5f}".format(epoch, loss.item(), perplexity))
             total_loss = 0
             model.train()
-
+    save_model(model, epoch)
+    pickle.dump(perplexity_list, open('perplexity_list.p', 'wb'))
+    pickle.dump(loss_list, open('loss_list.p', 'wb'))
 
 
 plt.plot(loss_list)
