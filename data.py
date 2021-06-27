@@ -1,4 +1,4 @@
-from caption_model import *
+import torch
 from torch.utils.data import DataLoader, Dataset
 from torch.nn.utils.rnn import pad_sequence
 import pandas as pd
