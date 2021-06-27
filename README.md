@@ -81,9 +81,31 @@ transforms = T.Compose([
     T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 ])
 ```
-### Captions
+#### Captions
 See [data.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/data.py) for details and implementation.
 - We start by building the vocabulary from the *full* data with the addition of the special tokens:`<PAD>,<SOS>,<EOS>,<UNK>` ;see build_vocab()
 - for each caption we add the `<SOS>,<EOS>` to the beginning/end respectively, replace rare words with `<UNK>` 
 - Since we are passing the captions as tensors, we need to maintain fixed size inputs. therefore we add `<PAD>` tokens at the end of shorter captions.
 - using the vocabulary, we numericalize the captions using the `stoi` to be compatible with PyTorch Embedding layer.
+
+#### Implementation
+See [data.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/data.py) for details.
+
+`FlickrDataset` is a subclass of PyTorch [`Dataset`](https://pytorch.org/docs/master/data.html#torch.utils.data.Dataset). It needs a `__len__` method defined, which returns the size of the dataset, and a `__getitem__` method which returns the `i`th image, caption, and caption length.
+The `FlickrDataset` will be used by a PyTorch [`DataLoader`](https://pytorch.org/docs/master/data.html#torch.utils.data.DataLoader) in `train.py` to create and feed batches of data to the model for training or validation.
+
+### Models
+See [models.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/data.py) for details and implementation.
+
+- `EncoderCNN` uses a pretrained Resnet-50 already available in PyTorch's `torchvision` module as mentioned before, feel free to use a different model. We discard the last two layers since we only want to encode the image.
+- `Attention` Network transforms both the the encoded image and the and the Decoder's hidden state to the same dimenstion `attention_dim` using a fully connected NN with `tanh` activations. This is later transformed using a linear layer with softmax to get `alpha` which sum to 1. returns the `alpha` and the weights (which are also used for visualization later).
+- `DecoderRNN` is an *LSTM* model with *soft attention*. We initialize the hidden and cell state using the encoded image with the `init_hidden_state()` method, which uses two separate linear layers. 
+and we initialize the Embeddings randomly or using pretrained word embedding model*.
+if a word doesn't exist in the model's vocabulary we initialize it randomly. the list of available models can be found [*here*](https://pytorch.org/text/stable/vocab.html#glove). 
+To execute the attention mechanism we iterate through the tokens manually using PyTorch **LSTMCell** and we compute the weights and attention-weighted encoding at each timestep with the `Attention` network.
+
+We concatenate the attention-weighted encoding with the embedding of the previous word and run the LSTMCell to generate the new hidden state. A linear layer transforms this new hidden state into scores for each word in the vocabulary. 
+
+### Training 
+you can perform the entire training by running [Train.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/Train.py)
+The hyperparameter are at the beginnning of the file, so you can change it easily.
