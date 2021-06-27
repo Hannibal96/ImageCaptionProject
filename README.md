@@ -48,19 +48,42 @@ describe the weighted image features (Decoder) - We will use an LSTM
 
 
 ### Data
-We will use the **Flicker8k** dataset which can be downloaded from [***here***](https://www.kaggle.com/ming666/flicker8k-dataset)
+We will use the **Flicker8k** dataset which can be downloaded from [***here***](https://www.kaggle.com/adityajn105/flickr8k)
 that have 8092 images along with 5 _reference_ captions per image (used for [evaluation](https://github.com/Hannibal96/ImageCaptionProject/blob/master/README.md#evaluation-metric)
+
+#### training, validation and test split:
+- We will use the popular Karpathy split, which can be downloaded from [***here***](https://cs.stanford.edu/people/karpathy/deepimagesent/)
 
 ### Evaluation Metric
 By far the most popular metric for evaluating generated sentences is the [***Blue score***](https://www.aclweb.org/anthology/P02-1040.pdf)
 Which uses the 5 reference captions provided in the dataset to evaluate the generated caption.
 
 ## Usage 
-- Download the dataset as described above
-- The dataset contains few folders:
-    - Flicker8k_Dataset  folder contains all the images 
-    - Flickr8k_text folder which contains different multiple folders:
-        - We will use only the **Flickr8k.token.txt** which contains the raw captions per image
-        - You can use the lemmatized version of the above captions (Flickr8k.lemma.txt)
 
-- save ...
+### Dependencies
+- software dependencies can be found in [requirements.txt]https://github.com/Hannibal96/ImageCaptionProject/blob/master/requirements.txt)
+- Download the dataset as described above
+- The dataset contains :
+    - Images folder which contains all the images 
+    - captions.txt which contains 5 different captions for each image(name) in Images folder
+- karpathy split is availabe in [Karpathy_split.json]https://github.com/Hannibal96/ImageCaptionProject/blob/master/Karpathy_split.json)
+
+### Data Pipeline
+#### Images
+Since we are using a pretrained CNN, we need to preprocess the images to have similar shape/stats that this model expect.
+[This page](https://pytorch.org/vision/stable/models.html) contains information regarding the preprocessing needed.
+in our case, we are using the following preprocessing:
+```python
+transforms = T.Compose([
+    T.Resize(226),
+    T.RandomCrop(224),
+    T.ToTensor(),
+    T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+])
+```
+### Captions
+See [data.py]https://github.com/Hannibal96/ImageCaptionProject/blob/master/data.py) for details and implementation.
+- We start by building the vocabulary from the *full* data with the addition of the special tokens:`<PAD>,<SOS>,<EOS>,<UNK>` ;see build_vocab()
+- for each caption we add the `<SOS>,<EOS>` to the beginning/end respectively, replace rare words with `<UNK>` 
+- Since we are passing the captions as tensors, we need to maintain fixed size inputs. therefore we add `<PAD>` tokens at the end of shorter captions.
+- using the vocabulary, we numericalize the captions using the `stoi` to be compatible with PyTorch Embedding layer.
