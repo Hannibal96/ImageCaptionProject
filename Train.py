@@ -1,6 +1,7 @@
 from DataLoader import *
 from tqdm import tqdm
 
+
 def save_model(model, num_epochs):
     path = "caption_model_E_"+str(num_epochs)+".torch"
     torch.save(model, path)
@@ -8,7 +9,7 @@ def save_model(model, num_epochs):
 
 data_location = "."
 BATCH_SIZE = 32
-NUM_WORKER = 4
+NUM_WORKER = 0
 
 # defining the transform to be applied
 transforms = T.Compose([
@@ -19,7 +20,7 @@ transforms = T.Compose([
 ])
 
 
-dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions.txt",
+dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions_train.txt",
                         transform=transforms)
 print("Finished building the Dataset.")
 
@@ -46,8 +47,8 @@ model = EncoderDecoder(
 criterion = nn.CrossEntropyLoss(ignore_index=dataset.vocab.stoi["<PAD>"])
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-num_epochs = 1
-print_every = 100
+num_epochs = 10
+print_every = 10
 
 pad_idx = dataset.vocab.stoi["<PAD>"]
 

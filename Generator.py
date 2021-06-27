@@ -7,7 +7,7 @@ def get_caps_from(features_tensors, model):
     model.eval()
     with torch.no_grad():
         features = model.encoder(features_tensors.to(device))
-        caps, alphas = model.decoder.generate_caption(features, vocab=dataset.vocab)
+        caps, alphas = model.decoder.generate_caption(features, vocab=train_dataset.vocab)
         caption = ' '.join(caps)
         show_image(features_tensors[0], title=caption)
 
@@ -47,7 +47,9 @@ data_location = '.'
 transforms = T.Compose([T.Resize(226), T.RandomCrop(224), T.ToTensor(), T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 
 
-dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions.txt",
+dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions_test.txt",
+                        transform=transforms)
+train_dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions_train.txt",
                         transform=transforms)
 print("Finished building the Dataset.")
 
@@ -63,16 +65,18 @@ data_loader = DataLoader(
 )
 
 # show any 1
-dataiter = iter(data_loader)
-images, _ = next(dataiter)
 
-model_name = './caption_model_E_1.torch'
-model = torch.load(model_name)
+for i in range(1,11):
+    dataiter = iter(data_loader)
+    images, _ = next(dataiter)
 
-img = images[0].detach().clone()
-img1 = images[0].detach().clone()
+    model_name = './caption_model_E_'+str(i)+'.torch'
+    model = torch.load(model_name)
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-caps, alphas = get_caps_from(img.unsqueeze(0), model=model)
+    img = images[0].detach().clone()
+    img1 = images[0].detach().clone()
 
-plot_attention(img1, caps, alphas)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    caps, alphas = get_caps_from(img.unsqueeze(0), model=model)
+
+    plot_attention(img1, caps, alphas)
