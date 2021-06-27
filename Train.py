@@ -5,6 +5,7 @@ from torchtext.vocab import GloVe # for pretrained model
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import pickle
+from nltk.translate.bleu_score import sentence_bleu
 
 def save_model(model, num_epochs):
     path = "caption_model_E_"+str(num_epochs)+".torch"
@@ -65,7 +66,7 @@ criterion = nn.CrossEntropyLoss(ignore_index=vocab.stoi["<PAD>"]).to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 num_epochs = 10
-print_every = 10
+print_every = 100
 
 pad_idx = vocab.stoi["<PAD>"]
 
@@ -79,6 +80,7 @@ data_loader = DataLoader(
 
 loss_list = []
 perplexity_list = []
+bleu_list = []
 total_loss = 0
 for epoch in range(1, num_epochs + 1):
     for idx, (image, captions) in enumerate(iter(data_loader)):
@@ -113,18 +115,25 @@ for epoch in range(1, num_epochs + 1):
             model.eval()
             with torch.no_grad():
                 dataiter = iter(data_loader)
-                img, true_caption = next(dataiter)
-                true_caption = true_caption[0:1]
+                img, true_captions = next(dataiter)
                 features = model.encoder(img[0:1].to(device))
                 caps, alphas = model.decoder.generate_caption(features, vocab=vocab)
-                caption = ' '.join(caps)
-                show_image(img[0], title=caption)
-            print("Epoch: {} loss: {:.5f}, perplexity: {:.5f}".format(epoch, loss.item(), perplexity))
+                hyp_caption = ' '.join(caps)
+                ref_1 = [vocab.itos[int(idx)] for idx in true_captions[0]]
+                ref_2 = [vocab.itos[int(idx)] for idx in true_captions[1]]
+                ref_3 = [vocab.itos[int(idx)] for idx in true_captions[2]]
+                ref_4 = [vocab.itos[int(idx)] for idx in true_captions[3]]
+                ref_5 = [vocab.itos[int(idx)] for idx in true_captions[4]]
+                blew_score = sentence_bleu(references=[ref_1, ref_2, ref_3, ref_4, ref_5], hypothesis=hyp_caption.split())
+                bleu_list.append(blew_score)
+                show_image(img[0], title=hyp_caption)
+            print("Epoch: {} loss: {:.3f}, perplexity: {:.3f}, BLEU: {:.3f}".format(epoch, loss.item(), perplexity, blew_score))
             total_loss = 0
             model.train()
     save_model(model, epoch)
     pickle.dump(perplexity_list, open('perplexity_list.p', 'wb'))
     pickle.dump(loss_list, open('loss_list.p', 'wb'))
+    pickle.dump(bleu_list, open('blew_list.p', 'wb'))
 
 
 plt.plot(loss_list)
@@ -133,4 +142,9 @@ plt.show()
 
 plt.plot(perplexity_list)
 plt.title('Perplexity')
+plt.show()
+
+
+plt.plot(bleu_list)
+plt.title('BLEW')
 plt.show()
