@@ -61,12 +61,12 @@ Which uses the 5 reference captions provided in the dataset to evaluate the gene
 ## Usage 
 
 ### Dependencies
-- software dependencies can be found in [requirements.txt]https://github.com/Hannibal96/ImageCaptionProject/blob/master/requirements.txt)
+- software dependencies can be found in [requirements.txt](https://github.com/Hannibal96/ImageCaptionProject/blob/master/requirements.txt)
 - Download the dataset as described above
 - The dataset contains :
     - Images folder which contains all the images 
     - captions.txt which contains 5 different captions for each image(name) in Images folder
-- karpathy split is availabe in [Karpathy_split.json]https://github.com/Hannibal96/ImageCaptionProject/blob/master/Karpathy_split.json)
+- karpathy split is availabe in [Karpathy_split.json](https://github.com/Hannibal96/ImageCaptionProject/blob/master/Karpathy_split.json)
 
 ### Data Pipeline
 #### Images
@@ -82,7 +82,7 @@ transforms = T.Compose([
 ])
 ```
 ### Captions
-See [data.py]https://github.com/Hannibal96/ImageCaptionProject/blob/master/data.py) for details and implementation.
+See [data.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/data.py) for details and implementation.
 - We start by building the vocabulary from the *full* data with the addition of the special tokens:`<PAD>,<SOS>,<EOS>,<UNK>` ;see build_vocab()
 - for each caption we add the `<SOS>,<EOS>` to the beginning/end respectively, replace rare words with `<UNK>` 
 - Since we are passing the captions as tensors, we need to maintain fixed size inputs. therefore we add `<PAD>` tokens at the end of shorter captions.
