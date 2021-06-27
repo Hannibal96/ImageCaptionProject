@@ -26,6 +26,11 @@ class EncoderCNN(nn.Module):
 # Bahdanau Attention
 class Attention(nn.Module):
     def __init__(self, encoder_dim, decoder_dim, attention_dim):
+         """
+        :param encoder_dim: feature size of encoded images
+        :param decoder_dim: size of decoder's RNN
+        :param attention_dim: size of the attention network
+        """
         super(Attention, self).__init__()
 
         self.attention_dim = attention_dim
@@ -37,21 +42,22 @@ class Attention(nn.Module):
 
     def forward(self, features, hidden_state):
         '''
-        features: output of Encoder with shape (batch_size,49,encoder_dim)
-        hidden_state: with shape (batch_size, decoder_dim)
+        :param features: output of Encoder, a tensor with dimension (batch_size,49,encoder_dim)
+        :param hidden_state: previous decoder output, a tensor of dimension (batch_size, decoder_dim)
         '''
-        u_hs = self.U(features)  # (batch_size,num_layers,attention_dim)
+        u_hs = self.U(features)  # (batch_size,49,attention_dim)
         w_ah = self.W(hidden_state)  # (batch_size,attention_dim)
 
-        combined_states = torch.tanh(u_hs + w_ah.unsqueeze(1))  # (batch_size,num_layers,attemtion_dim)
+        combined_states = torch.tanh(u_hs + w_ah.unsqueeze(1))  # (batch_size,49,attention_dim)
+        
+        # this gives an unnormalized score for each image feature
+        attention_scores = self.A(combined_states)  # (batch_size,49,1)
+        attention_scores = attention_scores.squeeze(2)  # (batch_size,49)
 
-        attention_scores = self.A(combined_states)  # (batch_size,num_layers,1)
-        attention_scores = attention_scores.squeeze(2)  # (batch_size,num_layers)
+        alpha = F.softmax(attention_scores, dim=1)  # (batch_size,49)
 
-        alpha = F.softmax(attention_scores, dim=1)  # (batch_size,num_layers)
-
-        attention_weights = features * alpha.unsqueeze(2)  # (batch_size,num_layers,features_dim)
-        attention_weights = attention_weights.sum(dim=1)  # (batch_size,num_layers)
+        attention_weights = features * alpha.unsqueeze(2)  # (batch_size,49,features_dim)
+        attention_weights = attention_weights.sum(dim=1)  # (batch_size,49)
 
         return alpha, attention_weights
 
@@ -77,6 +83,7 @@ class DecoderRNN(nn.Module):
         self.init_c = nn.Linear(encoder_dim, decoder_dim)
         self.lstm_cell = nn.LSTMCell(embed_size + encoder_dim, decoder_dim, bias=True)
         self.f_beta = nn.Linear(decoder_dim, encoder_dim)
+        self.sigmoid = nn.Sigmoid()
 
         self.fcn = nn.Linear(decoder_dim, vocab_size)
         self.drop = nn.Dropout(drop_prob)
@@ -110,7 +117,10 @@ class DecoderRNN(nn.Module):
 
         for s in range(seq_length):
             alpha, context = self.attention(features, h)
-            lstm_input = torch.cat((embeds[:, s], context), dim=1)
+            
+            gate = self.sigmoid(self.f_beta(h))
+            context = gate * context
+            lstm_input = torch.cat((embeds[:, s], context), dim=1) # (batch_size,1 , embed_dim + decoder_dim)
             h, c = self.lstm_cell(lstm_input, (h, c))
 
             output = self.fcn(self.drop(h))
@@ -140,7 +150,9 @@ class DecoderRNN(nn.Module):
 
             # store the apla score
             alphas.append(alpha.cpu().detach().numpy())
-
+            
+            gate = self.sigmoid(self.f_beta(h))
+            context = gate * context
             lstm_input = torch.cat((embeds[:, 0], context), dim=1)
             h, c = self.lstm_cell(lstm_input, (h, c))
             output = self.fcn(self.drop(h))
