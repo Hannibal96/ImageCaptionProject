@@ -141,6 +141,8 @@ class DecoderRNN(nn.Module):
 
         # starting input
         word = torch.tensor(vocab.stoi['<SOS>']).view(1, -1)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        word = word.to(device)
         embeds = self.embedding(word)
 
         captions = []
@@ -213,7 +215,7 @@ def load_embedding_weights(vocab, embedding_model):
             weights_matrix[i] = embedding_model[s]
         # if not, take the embeddings from close token (fix spelling)
         elif str(TextBlob(s).correct()) in embedding_model.stoi.keys():
-            print(s,str(TextBlob(s).correct()))
+            #print(s,str(TextBlob(s).correct()))
             weights_matrix[i] = embedding_model[str(TextBlob(s).correct())]
         # else initialize randomly
         else:
