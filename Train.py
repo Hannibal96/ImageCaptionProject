@@ -152,6 +152,10 @@ if __name__ == "__main__":
         model.eval()
         bleu, loss, perp = evaluate(model, val_data)
         model.train()
+        print("Epoch: {} loss: {:.3f}, perplexity: {:.3f}, BLEU: {:.3f}".format(epoch, loss, perp, bleu))
+        perplexity_list.append(perp)
+        loss_list.append(loss)
+        bleu_list.append(bleu)
 
         pickle.dump(perplexity_list, open('perplexity_list.p', 'wb'))
         pickle.dump(loss_list, open('loss_list.p', 'wb'))
@@ -165,7 +169,6 @@ if __name__ == "__main__":
     plt.plot(perplexity_list)
     plt.title('Perplexity')
     plt.show()
-
 
     plt.plot(bleu_list)
     plt.title('BLEW')
