@@ -1,4 +1,4 @@
-from DataLoader import *
+from Train import *
 
 
 # generate caption
@@ -42,41 +42,46 @@ def plot_attention(img, result, attention_plot):
     plt.show()
 
 
-data_location = '.'
+if __name__ == "__main__":
 
-transforms = T.Compose([T.Resize(226), T.RandomCrop(224), T.ToTensor(), T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
+    data_location = '.'
+    captions_file_path = "captions.txt"
+    karpathy_json_path = 'Karpathy_data.json'
 
+    transforms = T.Compose([T.Resize(226), T.RandomCrop(224), T.ToTensor(), T.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 
-dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions_test.txt",
-                        transform=transforms)
-train_dataset = FlickrDataset(root_dir=data_location+"/Images", captions_file=data_location+"/captions_train.txt",
-                        transform=transforms)
-print("Finished building the Dataset.")
+    #build vocab
+    vocab = build_vocab(captions_file_path=captions_file_path)
 
+    #build datasets
+    train, val, test = karpathy_split(captions_file_path, karpathy_json_path)
+    train_dataset = FlickrDataset(root_dir='./Images',vocab= vocab, captions_df=train,transform=transforms)
+    val_dataset = FlickrDataset(root_dir='./Images',vocab= vocab, captions_df=val,transform=transforms)
+    test_dataset = FlickrDataset(root_dir='./Images',vocab= vocab, captions_df=test,transform=transforms)
+    print("Finished building the Datasets.")
+    pad_idx = vocab.stoi["<PAD>"]
 
-pad_idx = dataset.vocab.stoi["<PAD>"]
+    data_loader = DataLoader(
+        dataset=val_dataset,
+        batch_size=1,
+        num_workers=0,
+        shuffle=True,
+        collate_fn=CapsCollate(pad_idx=pad_idx, batch_first=True)
+    )
 
-data_loader = DataLoader(
-    dataset=dataset,
-    batch_size=1,
-    num_workers=0,
-    shuffle=True,
-    collate_fn=CapsCollate(pad_idx=pad_idx, batch_first=True)
-)
+    # show any 1
 
-# show any 1
+    for i in range(1, 11):
+        dataiter = iter(data_loader)
+        images, _ = next(dataiter)
 
-for i in range(1,11):
-    dataiter = iter(data_loader)
-    images, _ = next(dataiter)
+        model_name = './caption_model_E_'+str(i)+'.torch'
+        model = torch.load(model_name)
 
-    model_name = './caption_model_E_'+str(i)+'.torch'
-    model = torch.load(model_name)
+        img = images[0].detach().clone()
+        img1 = images[0].detach().clone()
 
-    img = images[0].detach().clone()
-    img1 = images[0].detach().clone()
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        caps, alphas = get_caps_from(img.unsqueeze(0), model=model)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    caps, alphas = get_caps_from(img.unsqueeze(0), model=model)
-
-    plot_attention(img1, caps, alphas)
+        plot_attention(img1, caps, alphas)

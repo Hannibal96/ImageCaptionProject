@@ -81,11 +81,16 @@ class FlickrDataset(Dataset):
 
         # Initialize vocabulary and build vocab
         self.vocab = vocab
-        
+
+        self.last_idx = -1
+
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, idx):
+
+        self.last_idx = idx
+
         caption = self.captions[idx]
         img_name = self.imgs[idx]
         img_location = os.path.join(self.root_dir, img_name)
@@ -100,8 +105,18 @@ class FlickrDataset(Dataset):
         caption_vec += [self.vocab.stoi["<SOS>"]]
         caption_vec += self.vocab.numericalize(caption)
         caption_vec += [self.vocab.stoi["<EOS>"]]
-
         return img, torch.tensor(caption_vec)
+
+    def get_last_captions(self):
+        idx = self.last_idx
+        idx = (idx // 5) * 5
+        #captions = self.captions[idx // 5 * 5: idx // 5 * 5 + 5]
+        captions = []
+        for i in range(1,6):
+            t = list(self.captions[idx:idx + i])[-1]
+            t = t.split()
+            captions.append(t)
+        return captions
 
 
 def show_image(inp, title=None):
