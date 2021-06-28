@@ -9,6 +9,7 @@ import json
 import os
 from PIL import Image
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class CapsCollate:
@@ -70,8 +71,10 @@ class FlickrDataset(Dataset):
     """
     FlickrDataset
     """
-    def __init__(self, root_dir, captions_df, vocab, transform=None):
+    def __init__(self, root_dir, captions_df, vocab, transform=None, is_train=True, cpi = 5):
         self.root_dir = root_dir
+        self.cpi = cpi #captions/images
+        self.is_train = is_train
         self.df = captions_df
         self.transform = transform
 
@@ -83,26 +86,37 @@ class FlickrDataset(Dataset):
         self.vocab = vocab
         
     def __len__(self):
-        return len(self.df)
+        return len(self.imgs.unique())
 
     def __getitem__(self, idx):
-        caption = self.captions[idx]
-        img_name = self.imgs[idx]
+        captions_list = self.captions[(idx * self.cpi):(idx * self.cpi) + self.cpi].to_list()
+        img_name = self.imgs[idx*self.cpi]
         img_location = os.path.join(self.root_dir, img_name)
         img = Image.open(img_location).convert("RGB")
 
         # apply the transfromation to the image
         if self.transform is not None:
             img = self.transform(img)
+        
+        if self.is_train:
+            # sample one caption and numericalize it
+            caption = str(np.random.choice(captions_list,1)[0])
+            caption_vec = []
+            caption_vec += [self.vocab.stoi["<SOS>"]]
+            caption_vec += self.vocab.numericalize(caption)
+            caption_vec += [self.vocab.stoi["<EOS>"]]
 
-        # numericalize the caption text
-        caption_vec = []
-        caption_vec += [self.vocab.stoi["<SOS>"]]
-        caption_vec += self.vocab.numericalize(caption)
-        caption_vec += [self.vocab.stoi["<EOS>"]]
-
-        return img, torch.tensor(caption_vec)
-
+            return img, torch.tensor(caption_vec)
+       
+        else:
+            captions_vec = []
+            for caption in captions_list:
+                caption_vec = []
+                caption_vec += ["<SOS>"]
+                caption_vec += caption.split(' ')
+                caption_vec += ["<EOS>"]
+                captions_vec.append(caption_vec)
+            return img, captions_vec
 
 def show_image(inp, title=None):
     """Imshow for Tensor."""

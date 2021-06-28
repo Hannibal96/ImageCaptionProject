@@ -25,8 +25,10 @@ class EncoderCNN(nn.Module):
 
 # Bahdanau Attention
 class Attention(nn.Module):
+    
     def __init__(self, encoder_dim, decoder_dim, attention_dim):
-         """
+        
+        """
         :param encoder_dim: feature size of encoded images
         :param decoder_dim: size of decoder's RNN
         :param attention_dim: size of the attention network
@@ -39,7 +41,7 @@ class Attention(nn.Module):
         self.U = nn.Linear(encoder_dim, attention_dim)
 
         self.A = nn.Linear(attention_dim, 1)
-
+        
     def forward(self, features, hidden_state):
         '''
         :param features: output of Encoder, a tensor with dimension (batch_size,49,encoder_dim)
