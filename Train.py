@@ -13,6 +13,33 @@ def save_model(model, num_epochs):
     torch.save(model, path)
 
 
+def evaluate(model, val_data_set):
+    blew_score = 0
+    total_val_loss = 0
+
+    with torch.no_grad():
+        for idx, (image, captions) in tqdm(enumerate(iter(val_data_set))):
+            image, captions = image.to(device), captions.to(device)
+
+            all_captions = val_dataset.get_last_captions()
+            features = model.encoder(image[0:1].to(device))
+            caps, alphas = model.decoder.generate_caption(features, vocab=vocab)
+            hyp_caption = ' '.join(caps)
+            curr_blew_score = sentence_bleu(references=all_captions, hypothesis=hyp_caption.split())
+            blew_score += curr_blew_score
+
+            outputs, attentions = model(image, captions)
+            outputs = outputs.to(device)
+            targets = captions[:, 1:]
+            targets = targets.to(device)
+            val_loss = criterion(outputs.view(-1, vocab_size), targets.reshape(-1))
+            total_val_loss += val_loss.item()
+
+    perplexity = total_val_loss / len(val_data_set)
+    perplexity = np.exp(perplexity)
+    return blew_score / len(val_data_set), total_val_loss/len(val_data_set), perplexity
+
+
 if __name__ == "__main__":
 
     captions_file_path = "captions.txt"
@@ -72,7 +99,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     num_epochs = 10
-    print_every = 100
+    print_every = 1000
 
     loss_list = []
     perplexity_list = []
@@ -110,23 +137,22 @@ if __name__ == "__main__":
                 # generate the caption
                 model.eval()
                 with torch.no_grad():
-                    dataiter = iter(val_data)
+                    dataiter = iter(train_data)
                     img, true_captions = next(dataiter)
-
-                    all_captions = val_dataset.get_last_captions()
 
                     features = model.encoder(img[0:1].to(device))
                     caps, alphas = model.decoder.generate_caption(features, vocab=vocab)
-                    hyp_caption = ' '.join(caps)
 
-                    blew_score = sentence_bleu(references=all_captions, hypothesis=hyp_caption.split())
-
-                    bleu_list.append(blew_score)
                     show_image(img[0], title=hyp_caption)
                 print("Epoch: {} loss: {:.3f}, perplexity: {:.3f}, BLEU: {:.3f}".format(epoch, loss.item(), perplexity, blew_score))
                 total_loss = 0
                 model.train()
         save_model(model, epoch)
+
+        model.eval()
+        bleu, loss, perp = evaluate(model, val_data)
+        model.train()
+
         pickle.dump(perplexity_list, open('perplexity_list.p', 'wb'))
         pickle.dump(loss_list, open('loss_list.p', 'wb'))
         pickle.dump(bleu_list, open('blew_list.p', 'wb'))
