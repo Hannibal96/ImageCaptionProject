@@ -2,6 +2,8 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from torch.nn.utils.rnn import pad_sequence
 import pandas as pd
+import numpy as np
+
 import spacy
 from collections import Counter
 from tqdm import tqdm
@@ -9,24 +11,27 @@ import json
 import os
 from PIL import Image
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 class CapsCollate:
     """
     Collate to apply the padding to the captions with dataloader
     """
-    def __init__(self, pad_idx, batch_first=False):
+    def __init__(self, pad_idx, batch_first=False, is_train=True):
         self.pad_idx = pad_idx
         self.batch_first = batch_first
+        self.is_train = is_train
 
     def __call__(self, batch):
-        imgs = [item[0].unsqueeze(0) for item in batch]
+        imgs = [item[0].unsqueeze(0) for item in batch]# (1,3,224,224) -> (3,224,224)
         imgs = torch.cat(imgs, dim=0)
-
         targets = [item[1] for item in batch]
         targets = pad_sequence(targets, batch_first=self.batch_first, padding_value=self.pad_idx)
-        return imgs, targets
+
+        if self.is_train:
+            return imgs, targets
+        else: #return all caps as well
+            return imgs, targets, [item[2] for item in batch]#list of lists of tokens
 
 
 class Vocabulary:
@@ -81,15 +86,18 @@ class FlickrDataset(Dataset):
         # Get image and caption colum from the dataframe
         self.imgs = self.df["image"]
         self.captions = self.df["caption"]
+        self.num_distinct_imgs = len(self.imgs.unique())
 
         # Initialize vocabulary and build vocab
         self.vocab = vocab
-        
+
+        self.last_idx = -1
+
     def __len__(self):
-        return len(self.imgs.unique())
+        return self.num_distinct_imgs
 
     def __getitem__(self, idx):
-        captions_list = self.captions[(idx * self.cpi):(idx * self.cpi) + self.cpi].to_list()
+        captions_list = self.captions[(idx * self.cpi):(idx * self.cpi) + self.cpi].to_list()#get all 5 caps
         img_name = self.imgs[idx*self.cpi]
         img_location = os.path.join(self.root_dir, img_name)
         img = Image.open(img_location).convert("RGB")
@@ -98,25 +106,22 @@ class FlickrDataset(Dataset):
         if self.transform is not None:
             img = self.transform(img)
         
+        
+        # sample one caption and numericalize it
+        caption = str(np.random.choice(captions_list,1)[0])
+        caption_vec = []
+        caption_vec += [self.vocab.stoi["<SOS>"]]
+        caption_vec += self.vocab.numericalize(caption)
+        caption_vec += [self.vocab.stoi["<EOS>"]]
+        # for training we want only one caption per image
         if self.is_train:
-            # sample one caption and numericalize it
-            caption = str(np.random.choice(captions_list,1)[0])
-            caption_vec = []
-            caption_vec += [self.vocab.stoi["<SOS>"]]
-            caption_vec += self.vocab.numericalize(caption)
-            caption_vec += [self.vocab.stoi["<EOS>"]]
-
             return img, torch.tensor(caption_vec)
-       
+       # for Evaluation we would need one encoded caption for loss and raw reference captions for BLEU
         else:
-            captions_vec = []
-            for caption in captions_list:
-                caption_vec = []
-                caption_vec += ["<SOS>"]
-                caption_vec += caption.split(' ')
-                caption_vec += ["<EOS>"]
-                captions_vec.append(caption_vec)
-            return img, captions_vec
+            # BLEU expects list of tokens 
+            all_caps = [c.split() for c in captions_list]
+            return img,torch.tensor(caption_vec), all_caps
+
 
 def show_image(inp, title=None):
     """Imshow for Tensor."""
