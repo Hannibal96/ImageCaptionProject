@@ -92,6 +92,7 @@ See [data.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/data
 See [data.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/data.py) for details.
 
 `FlickrDataset` is a subclass of PyTorch [`Dataset`](https://pytorch.org/docs/master/data.html#torch.utils.data.Dataset). It needs a `__len__` method defined, which returns the size of the dataset, and a `__getitem__` method which returns the `i`th image, caption, and caption length.
+- for each image we have 5 different captions, for training we pick one randomly each epoch and for evaluation we use them all as references for BLEU scoring.
 The `FlickrDataset` will be used by a PyTorch [`DataLoader`](https://pytorch.org/docs/master/data.html#torch.utils.data.DataLoader) in `train.py` to create and feed batches of data to the model for training or validation.
 
 ### Models
