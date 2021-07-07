@@ -104,4 +104,12 @@ In order to execute the attention mechanism in the forward pass we iterate throu
 
 ### Training 
 you can perform the entire training by running [Train.py](https://github.com/Hannibal96/ImageCaptionProject/blob/master/Train.py)
-The hyperparameters are at the beginnning of the file, so you can change it easily.
+The hyperparameters are at the beginnning of the file, so you can change it easily. or by using [Demo.ipynb](https://github.com/Hannibal96/ImageCaptionProject/blob/master/Demo.ipynb)
+
+### Ecaluation & Results
+We will use the bleu score from [the nltk package](https://www.nltk.org/_modules/nltk/translate/bleu_score.html):
+- our model's results vs performance reported in ***Attend, Show and Tell*** paper:
+
+- with vs without pre-trained word embeddings:
+
+
